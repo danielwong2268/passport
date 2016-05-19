@@ -13,19 +13,28 @@ module.exports = {
     // convert start time to date format
     var date = new Date(start * 1000),
         year = date.getUTCFullYear(),
-        month = date.getUTCMonth()+1,
-        day = date.getUTCDate();
+        month = date.getUTCMonth()+1 < 10 ? '0' + (date.getUTCMonth()+1) : date.getUTCMonth()+1;
+        day = date.getUTCDate() < 10 ? '0' + date.getUTCDate() : date.getUTCDate();
     var formattedDate = year + '-' + month + '-' + day;
 
     Timeslots.byId[newTimeslot.id] = newTimeslot;
-    Timeslots.byDate[formattedDate] = newTimeslot;
+
+    if (typeof Timeslots.byDate[formattedDate] === 'undefined') {
+      Timeslots.byDate[formattedDate] = [newTimeslot];
+    } else {
+      Timeslots.byDate[formattedDate].push(newTimeslot);
+    }
 
     res.send(newTimeslot);
   },
 
   getTimeslots: (req, res) => {
-    var date = req.params;
-    console.log('date', date);
+    var date = req.query.date;
+
+    var timeslots = Timeslots.byDate[date];
+
+
+    res.send(timeslots);
   },
 
   createBoat: (req, res) => {
@@ -52,20 +61,33 @@ module.exports = {
     var boat = Boats.byId[boatId],
         timeslot = Timeslots.byId[timeslotId];
 
-    timeslot.boats.push(boat);
+    timeslot.boats.push(boat.id);
+
+    // calculate the new availability
+    timeslot.setAvailability(boat.capacity);
 
     res.sendStatus(200);
   },
 
   createBooking: (req, res) => {
 
+    console.log('req.body', req.body);
+    var timeslotId = req.body['booking[timeslot_id]'],
+        bookingSize = req.body['booking[size]'];
+
+
+
+    // expect timeslot_id and size
+    // var timeslot = Timeslots.byId[]
+
+    // for (var i = 0; i < timeslot.boats.length; i++) {
+    //   timeslot.boats[i]
+    // }
+
+
+
   }
 }
-
-
-
-
-
 
 
 

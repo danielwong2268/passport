@@ -5,7 +5,7 @@ module.exports = function(app) {
   // routes here
 
   app.post('/api/timeslots', Boat.createTimeslots);
-  app.get('/api/timeslots/:date', Boat.getTimeslots);
+  app.get('/api/timeslots', Boat.getTimeslots);
   app.post('/api/boats', Boat.createBoat);
   app.get('/api/boats', Boat.listBoat);
   app.post('/api/assignments', Boat.assignBoatToTimeSlot);
