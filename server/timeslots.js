@@ -1,4 +1,4 @@
-module.exports = {
+var Timeslot = {
   byId: {},
   byDate: {},
   create: ( () => {
@@ -14,3 +14,5 @@ module.exports = {
   })()
 
 }
+
+module.exports = Timeslot;

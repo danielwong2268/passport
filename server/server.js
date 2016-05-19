@@ -8,10 +8,8 @@ var express = require('express'),
  * bodyParser to format data in request body
  */
 var cors = require('cors'),
-    morgan = require('morgan'),
     bodyParser = require('body-parser');
 
-app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
