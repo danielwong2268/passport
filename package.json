@@ -24,5 +24,8 @@
     "superagent": "^0.18.2",
     "vinyl-source-stream": "^0.1.1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
 }
