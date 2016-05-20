@@ -30,10 +30,7 @@ module.exports = {
 
   getTimeslots: (req, res) => {
     var date = req.query.date;
-
     var timeslots = Timeslots.byDate[date];
-
-
     res.send(timeslots);
   },
 
@@ -50,7 +47,11 @@ module.exports = {
   },
 
   listBoat: (req, res) => {
-
+    var boats = [];
+    for (var id in Boats.byId) {
+      boats.push(Boats.byId[id]);
+    }
+    res.send(boats);
   },
 
   assignBoatToTimeSlot: (req, res) => {
@@ -65,6 +66,12 @@ module.exports = {
 
     // calculate the new availability at that given timeslot
     timeslot.setAvailability(boat.capacity);
+
+    // check to see if there are any time conflicts, since a boat cannot be used in
+    // conflicting time slots
+
+    boat.timeslots[timeslot.id] = timeslot;
+
 
     res.sendStatus(200);
   },
@@ -87,6 +94,12 @@ module.exports = {
         }
       }
     }
+
+    if (typeof boat === 'undefined') {
+      res.status(500).send({error: 'We cannot accomodate this boat at this time'});
+      return;
+    }
+
     var boatCapacity = boat.capacity;
 
     boat.capacity -= bookingSize;
@@ -94,14 +107,13 @@ module.exports = {
 
     // if the largest boat is booked, recalculate the new availability.
     if (boatCapacity === timeslot.availability) {
-
       timeslot.availability = timeslot.boats.reduce(function(max, boatId) {
-        console.log('capacity', Boats.byId[boatId].capacity, max);
         return Math.max(Boats.byId[boatId].capacity, max);
       }, 0)
     }
 
     res.sendStatus(200);
+
   }
 }
 

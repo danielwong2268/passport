@@ -2,7 +2,6 @@ var Boat = require('./controllers/Boat.controller.js');
 
 
 module.exports = function(app) {
-  // routes here
 
   app.post('/api/timeslots', Boat.createTimeslots);
   app.get('/api/timeslots', Boat.getTimeslots);

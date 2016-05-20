@@ -4,7 +4,6 @@ var express = require('express'),
 /**
  * middleware
  * cors to allow for cross origin requests
- * morgan to log requests
  * bodyParser to format data in request body
  */
 var cors = require('cors'),
