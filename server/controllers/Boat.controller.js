@@ -38,7 +38,7 @@ module.exports = {
   },
 
   createBoat: (req, res) => {
-    var capacity = req.body['boat[capacity]'],
+    var capacity = +req.body['boat[capacity]'],
         name = req.body['boat[name]'];
 
     var newBoat = new Boats.create(capacity, name);
@@ -63,29 +63,45 @@ module.exports = {
 
     timeslot.boats.push(boat.id);
 
-    // calculate the new availability
+    // calculate the new availability at that given timeslot
     timeslot.setAvailability(boat.capacity);
 
     res.sendStatus(200);
   },
 
   createBooking: (req, res) => {
-
-    console.log('req.body', req.body);
     var timeslotId = req.body['booking[timeslot_id]'],
-        bookingSize = req.body['booking[size]'];
+        bookingSize = +req.body['booking[size]'];
 
+    var timeslot = Timeslots.byId[timeslotId],
+        boat,
+        minDiff;
 
+    // find the smallest boat that can fit the booking group
+    for (var i = 0; i < timeslot.boats.length; i++) {
+      var diff = Boats.byId[timeslot.boats[i]].capacity - bookingSize;
+      if (diff >= 0) {
+        if (typeof minDiff === 'undefined' || diff < minDiff) {
+          minDiff = diff;
+          boat = Boats.byId[timeslot.boats[i]];
+        }
+      }
+    }
+    var boatCapacity = boat.capacity;
 
-    // expect timeslot_id and size
-    // var timeslot = Timeslots.byId[]
+    boat.capacity -= bookingSize;
+    timeslot.customer_count += bookingSize;
 
-    // for (var i = 0; i < timeslot.boats.length; i++) {
-    //   timeslot.boats[i]
-    // }
+    // if the largest boat is booked, recalculate the new availability.
+    if (boatCapacity === timeslot.availability) {
 
+      timeslot.availability = timeslot.boats.reduce(function(max, boatId) {
+        console.log('capacity', Boats.byId[boatId].capacity, max);
+        return Math.max(Boats.byId[boatId].capacity, max);
+      }, 0)
+    }
 
-
+    res.sendStatus(200);
   }
 }
 
