@@ -55,6 +55,7 @@ module.exports = {
   },
 
   assignBoatToTimeSlot: (req, res) => {
+
     var timeslotId = req.body['assignment[timeslot_id]'],
         boatId = req.body['assignment[boat_id]'];
 
@@ -62,16 +63,13 @@ module.exports = {
     var boat = Boats.byId[boatId],
         timeslot = Timeslots.byId[timeslotId];
 
+    // store boat in timeslot, and timeslot in the boat
     timeslot.boats.push(boat.id);
+    timeslot.activeBoats[boat.id] = boatId;
+    boat.timeslots[timeslot.id] = timeslotId;
 
     // calculate the new availability at that given timeslot
-    timeslot.setAvailability(boat.capacity);
-
-    // check to see if there are any time conflicts, since a boat cannot be used in
-    // conflicting time slots
-
-    boat.timeslots[timeslot.id] = timeslot;
-
+    timeslot.availability = Math.max(boat.capacity, timeslot.availability);
 
     res.sendStatus(200);
   },
@@ -95,6 +93,7 @@ module.exports = {
       }
     }
 
+    // if no boat is found, then don't book anything and return an error message
     if (typeof boat === 'undefined') {
       res.status(500).send({error: 'We cannot accomodate this boat at this time'});
       return;
@@ -107,14 +106,36 @@ module.exports = {
 
     // if the largest boat is booked, recalculate the new availability.
     if (boatCapacity === timeslot.availability) {
-      timeslot.availability = timeslot.boats.reduce(function(max, boatId) {
-        return Math.max(Boats.byId[boatId].capacity, max);
-      }, 0)
+      timeslot.setAvailability();
     }
 
-    res.sendStatus(200);
+    // check for time conflicts, in the case the boat is booked in multiple time slots
+    for (var boatTS_Id in boat.timeslots) {
+      var timeslot2 = Timeslots.byId[boatTS_Id];
+      if (boatTS_Id !== timeslotId) {
+        var largerStart = Math.max(timeslot2.start_time, timeslot.start_time);
+        var smallerEnd = Math.min(timeslot2.start_time + 60 * timeslot2.duration,
+                                  timeslot.start_time + 60 * timeslot.duration);
 
+        // if there is a time conflict, then edit the timeslot (timeslot2)
+        if (smallerEnd > largerStart) {
+          // remove the boat from activeBoats
+          delete timeslot2.activeBoats[boat.id];
+          // recalculate availability if needed
+          if (timeslot2.availability === boatCapacity) {
+            timeslot2.setAvailability();
+          }
+        }
+      }
+    }
+
+    console.log('timeslots', Timeslots);
+    res.sendStatus(200);
   }
+
+
+
+
 }
 
 

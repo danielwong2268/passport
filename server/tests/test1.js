@@ -2,10 +2,9 @@ var mocha = require('mocha');
 var expect = require('chai').expect;
 var request = require('superagent');
 
-
-
-describe('Case1, extended', () => {
+describe('test1, extended', () => {
   it('should create two time slots - test POST/GET to /api/timeslots', function(done) {
+
     request
       .post('http://localhost:3000/api/timeslots')
       .send({'timeslot[start_time]':1406052000, 'timeslot[duration]': 120})
@@ -70,7 +69,7 @@ describe('Case1, extended', () => {
       .get('http://localhost:3000/api/boats')
       .end( (err, res) => {
         res.body.forEach( (boat) => {
-          expect(boat.timeslots['timeslot1'].id).to.equal('timeslot1');
+          expect(boat.timeslots['timeslot1']).to.equal('timeslot1');
         })
         done();
       })
@@ -105,11 +104,7 @@ describe('Case1, extended', () => {
         done();
       })
   })
+    
+
+
 })  
-
-
-
-
-
-
-

@@ -16,6 +16,8 @@ app.use(cors());
 // import the router, which contains the API routes
 require('./router.js')(app);
 
-app.listen(3000, function() {
+var server = app.listen(3000, function() {
   console.log('listening on port 3000');
 })
+
+module.exports = server;
